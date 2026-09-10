@@ -300,6 +300,19 @@
       <div class="text-white/60 text-xs mt-1 font-semibold">Demo scan — no real image analysis</div>
     </div>
 
+    <!-- no-match overlay: shown when the scanned photo doesn't look like a leaf -->
+    <div id="noMatchOverlay" class="absolute inset-0 z-30 hidden flex-col items-center justify-center px-8 text-center" style="top:34px; bottom:78px; background:rgba(23,59,44,.95);">
+      <div class="w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-5" style="background:#FBEAEA; color:var(--alert);">
+        <i class="fa-solid fa-circle-xmark"></i>
+      </div>
+      <div class="text-white font-extrabold text-lg leading-snug mb-1">Sahi Match Nahi Mila</div>
+      <div class="text-white/70 text-xs font-semibold mb-6">No correct match found — please scan a plant leaf</div>
+      <button id="noMatchRetryBtn" class="press-scale flex items-center gap-2 rounded-2xl px-6 py-3" style="background:var(--turmeric);">
+        <i class="fa-solid fa-rotate-right text-white"></i>
+        <span class="text-white font-extrabold text-sm">Dobara Try Karein</span>
+      </button>
+    </div>
+
     <!-- =================== SCREEN 2 : DIAGNOSIS & TREATMENT =================== -->
     <section class="screen" id="screen-treatment">
 
@@ -315,27 +328,27 @@
       <!-- diagnosis card -->
       <div class="card p-5 pop-in">
         <div class="flex items-center gap-4">
-          <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl flex-none" style="background:var(--leaf-light); color:var(--leaf-deep);">
-            <i class="fa-solid fa-leaf"></i>
+          <div id="diagIconWrap" class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl flex-none" style="background:var(--leaf-light); color:var(--leaf-deep);">
+            <i id="diagIcon" class="fa-solid fa-leaf"></i>
           </div>
           <div class="flex-1">
             <div class="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full mb-1" style="background:#FBE7C6; color:var(--turmeric-deep);">
               <i class="fa-solid fa-flask"></i> DEMO DIAGNOSIS
             </div>
-            <div class="text-lg font-extrabold leading-tight" style="color:var(--forest)">Fungal Leaf Spot</div>
-            <div class="text-xs font-semibold" style="color:var(--soil)">फंगल लीफ स्पॉट</div>
+            <div id="diagNameEn" class="text-lg font-extrabold leading-tight" style="color:var(--forest)">Fungal Leaf Spot</div>
+            <div id="diagNameHi" class="text-xs font-semibold" style="color:var(--soil)">फंगल लीफ स्पॉट</div>
           </div>
         </div>
 
-        <div class="flex items-center justify-between mt-4 pt-4" style="border-top:1.5px dashed #E4DCC8;">
+        <div id="diagSeverityRow" class="flex items-center justify-between mt-4 pt-4" style="border-top:1.5px dashed #E4DCC8;">
           <div class="text-xs font-bold" style="color:var(--soil)">Severity</div>
-          <div class="flex gap-1">
-            <i class="fa-solid fa-leaf sev-leaf on"></i>
-            <i class="fa-solid fa-leaf sev-leaf on"></i>
-            <i class="fa-solid fa-leaf sev-leaf"></i>
-            <i class="fa-solid fa-leaf sev-leaf"></i>
+          <div class="flex gap-1" id="diagSevLeaves">
+            <i class="fa-solid fa-leaf sev-leaf" data-i="0"></i>
+            <i class="fa-solid fa-leaf sev-leaf" data-i="1"></i>
+            <i class="fa-solid fa-leaf sev-leaf" data-i="2"></i>
+            <i class="fa-solid fa-leaf sev-leaf" data-i="3"></i>
           </div>
-          <div class="text-xs font-extrabold px-2.5 py-1 rounded-full" style="background:#FBE7C6; color:var(--turmeric-deep);">Moderate</div>
+          <div id="diagSevBadge" class="text-xs font-extrabold px-2.5 py-1 rounded-full" style="background:#FBE7C6; color:var(--turmeric-deep);">Moderate</div>
         </div>
       </div>
 
@@ -804,48 +817,164 @@ if (recognition){
 }
 
 /* ==================================================================
-   LEAF SCAN (camera or simulated)
+   LEAF SCAN (camera or simulated) + DIAGNOSIS POOL
    ================================================================== */
 const scanBtn = document.getElementById('scanBtn');
 const scanOverlay = document.getElementById('scanOverlay');
 const cameraInput = document.getElementById('cameraInput');
+const noMatchOverlay = document.getElementById('noMatchOverlay');
 
-function runScanAnimation(onDone){
-  scanOverlay.classList.remove('hidden');
-  scanOverlay.classList.add('flex');
-  setTimeout(()=>{
-    scanOverlay.classList.add('hidden');
-    scanOverlay.classList.remove('flex');
-    if (onDone) onDone();
-  }, 2200);
+/* Several possible demo outcomes — a real scan picks one at random
+   (or reports "no match" if the photo doesn't look like a leaf at all).
+   None of this is a real ML diagnosis; it's a scripted stand-in. */
+const diseases = [
+  { key:'fungal', icon:'fa-leaf', bg:'var(--leaf-light)', color:'var(--leaf-deep)',
+    nameEn:'Fungal Leaf Spot', nameHi:'फंगल लीफ स्पॉट', severity:2, sevLabel:{hi:'मध्यम', en:'Moderate'},
+    speech:{
+      hi:"नीम आधारित घोल तैयार करें। पानी में उचित मात्रा में नीम तेल मिलाएं। घोल को अच्छी तरह मिलाकर प्रभावित पौधों की पत्तियों पर छिड़कें।",
+      en:"Prepare a neem-based solution. Mix the right amount of neem oil in water. Stir well and spray it on the affected leaves." } },
+  { key:'bacterial', icon:'fa-biohazard', bg:'#FBEAEA', color:'var(--alert)',
+    nameEn:'Bacterial Blight', nameHi:'जीवाणु झुलसा', severity:3, sevLabel:{hi:'गंभीर', en:'Severe'}, bad:true,
+    speech:{
+      hi:"पत्तियों पर जीवाणु झुलसा रोग पाया गया है। तांबा आधारित घोल का छिड़काव करें और संक्रमित पत्तियां हटा दें।",
+      en:"Bacterial blight detected on the leaves. Spray a copper-based solution and remove the infected leaves." } },
+  { key:'mildew', icon:'fa-cloud', bg:'#E4DCF3', color:'#6A4FA0',
+    nameEn:'Powdery Mildew', nameHi:'चूर्णिल आसिता', severity:2, sevLabel:{hi:'मध्यम', en:'Moderate'},
+    speech:{
+      hi:"पत्तियों पर सफेद चूर्ण जैसी फफूंद पाई गई है। छाछ या सल्फर के घोल का छिड़काव करें।",
+      en:"White powdery fungus detected on the leaves. Spray a buttermilk or sulfur-based solution." } },
+  { key:'curl', icon:'fa-virus', bg:'#FCEAD1', color:'var(--turmeric-deep)',
+    nameEn:'Leaf Curl Virus', nameHi:'पत्ती मरोड़ विषाणु', severity:3, sevLabel:{hi:'गंभीर', en:'Severe'}, bad:true,
+    speech:{
+      hi:"पत्ती मरोड़ विषाणु के लक्षण मिले हैं। सफ़ेद मक्खी को नियंत्रित करें और संक्रमित पौधे हटा दें।",
+      en:"Symptoms of leaf curl virus detected. Control whiteflies and remove infected plants." } },
+  { key:'healthy', icon:'fa-circle-check', bg:'var(--leaf-light)', color:'var(--leaf-deep)',
+    nameEn:'Healthy Leaf', nameHi:'स्वस्थ पत्ती', severity:0, sevLabel:{hi:'स्वस्थ', en:'Healthy'},
+    speech:{
+      hi:"बधाई हो! आपकी फसल स्वस्थ दिखाई दे रही है। नियमित देखभाल और निगरानी जारी रखें।",
+      en:"Congratulations! Your crop looks healthy. Keep up the regular care and monitoring." } }
+];
+
+function pickRandomDisease(){
+  return diseases[Math.floor(Math.random() * diseases.length)];
+}
+
+/* fills the diagnosis card + stores this disease's speech for Play Audio */
+let currentDiagnosisSpeech = diseases[0].speech;
+function showTreatmentWithDiagnosis(d){
+  document.getElementById('diagIconWrap').style.background = d.bg;
+  const icon = document.getElementById('diagIcon');
+  icon.className = 'fa-solid ' + d.icon;
+  icon.style.color = d.color;
+  document.getElementById('diagNameEn').textContent = d.nameEn;
+  document.getElementById('diagNameHi').textContent = d.nameHi;
+
+  const sevRow = document.getElementById('diagSeverityRow');
+  if (d.severity === 0){
+    sevRow.querySelectorAll('.sev-leaf').forEach(l=>l.classList.remove('on','bad'));
+  } else {
+    sevRow.querySelectorAll('.sev-leaf').forEach((l,i)=>{
+      l.classList.toggle('on', i < d.severity);
+      l.classList.toggle('bad', i < d.severity && !!d.bad);
+    });
+  }
+  const badge = document.getElementById('diagSevBadge');
+  badge.textContent = d.sevLabel[currentLang];
+  badge.style.background = d.bad ? '#FBEAEA' : (d.severity===0 ? 'var(--leaf-light)' : '#FBE7C6');
+  badge.style.color = d.bad ? 'var(--alert)' : (d.severity===0 ? 'var(--leaf-deep)' : 'var(--turmeric-deep)');
+
+  currentDiagnosisSpeech = d.speech;
+  showScreen('treatment');
+  toast(currentLang==='hi' ? 'निदान तैयार है' : 'Diagnosis ready', 'fa-leaf');
+}
+
+function showNoMatch(){
+  noMatchOverlay.classList.remove('hidden');
+  noMatchOverlay.classList.add('flex');
+  speak(currentLang==='hi'
+    ? "सही मिलान नहीं मिला। कृपया पौधे की पत्ती को स्कैन करें।"
+    : "No correct match found. Please scan a plant leaf.", currentLang);
+}
+document.getElementById('noMatchRetryBtn').addEventListener('click', ()=>{
+  noMatchOverlay.classList.add('hidden');
+  noMatchOverlay.classList.remove('flex');
+  goHome();
+});
+
+/* very lightweight "is this a leaf" check: leaves are green-dominant;
+   a hand, sky, wall, etc. usually isn't. This is a heuristic stand-in
+   for a real vision model, not actual plant-disease detection. */
+function looksLikeLeaf(file){
+  return new Promise((resolve)=>{
+    try{
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        const img = new Image();
+        img.onload = ()=>{
+          const size = 32;
+          const canvas = document.createElement('canvas');
+          canvas.width = size; canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, size, size);
+          let r=0,g=0,b=0,n=0;
+          try{
+            const data = ctx.getImageData(0,0,size,size).data;
+            for (let i=0; i<data.length; i+=4){ r+=data[i]; g+=data[i+1]; b+=data[i+2]; n++; }
+          }catch(err){ resolve(true); return; } // canvas blocked (CORS etc.) — don't block the demo
+          r/=n; g/=n; b/=n;
+          resolve(g > r*1.06 && g > b*1.06);
+        };
+        img.onerror = ()=> resolve(true);
+        img.src = e.target.result;
+      };
+      reader.onerror = ()=> resolve(true);
+      reader.readAsDataURL(file);
+    }catch(err){ resolve(true); }
+  });
+}
+
+function runScanAnimation(){
+  return new Promise((resolve)=>{
+    scanOverlay.classList.remove('hidden');
+    scanOverlay.classList.add('flex');
+    setTimeout(()=>{
+      scanOverlay.classList.add('hidden');
+      scanOverlay.classList.remove('flex');
+      resolve();
+    }, 2200);
+  });
 }
 
 scanBtn.addEventListener('click', ()=>{
-  // Attempt real camera capture; whether or not a photo is chosen, the
-  // diagnosis shown is always the simulated demo result.
   try{
     cameraInput.value = '';
     cameraInput.click();
   }catch(e){
-    runScanAnimation(()=>{ showScreen('treatment'); toast('Demo diagnosis ready','fa-leaf'); });
+    // camera unavailable — fall back to a simulated (photo-less) scan
+    runScanAnimation().then(()=> showTreatmentWithDiagnosis(pickRandomDisease()));
   }
 });
+
 cameraInput.addEventListener('change', ()=>{
-  runScanAnimation(()=>{ showScreen('treatment'); toast('Demo diagnosis ready','fa-leaf'); });
+  const file = cameraInput.files && cameraInput.files[0];
+  if (!file){
+    runScanAnimation().then(()=> showTreatmentWithDiagnosis(pickRandomDisease()));
+    return;
+  }
+  Promise.all([ runScanAnimation(), looksLikeLeaf(file) ]).then(([_, isLeaf])=>{
+    if (isLeaf){ showTreatmentWithDiagnosis(pickRandomDisease()); }
+    else { showNoMatch(); }
+  });
 });
 // If the user dismisses the camera picker without choosing anything,
 // still let them proceed via a simulated scan fallback after a pause.
 cameraInput.addEventListener('cancel', ()=>{
-  runScanAnimation(()=>{ showScreen('treatment'); toast('Demo diagnosis ready','fa-leaf'); });
+  runScanAnimation().then(()=> showTreatmentWithDiagnosis(pickRandomDisease()));
 });
 
 /* ==================================================================
    SPEECH SYNTHESIS — treatment audio + paathshala narration
    ================================================================== */
-const treatmentSpeech = {
-  hi: "नीम आधारित घोल तैयार करें। पानी में उचित मात्रा में नीम तेल मिलाएं। घोल को अच्छी तरह मिलाकर प्रभावित पौधों की पत्तियों पर छिड़कें।",
-  en: "Prepare a neem-based solution. Mix the right amount of neem oil in water. Stir well and spray it on the affected leaves."
-};
 const stageData = [
   { key:'sowing', icon:'fa-seedling', color:'var(--leaf-deep)', bg:'#DFF3E4',
     title:{hi:'बुवाई', en:'Sowing'}, sub:{hi:'Sowing', en:'बुवाई'},
@@ -894,7 +1023,7 @@ const playLabel = document.getElementById('playLabel');
 playBtn.addEventListener('click', ()=>{
   playIcon.className = 'fa-solid fa-volume-high text-white text-xl animate-pulse';
   playLabel.textContent = currentLang === 'hi' ? 'चल रहा है…' : 'Playing…';
-  speak(treatmentSpeech[currentLang], currentLang, ()=>{
+  speak(currentDiagnosisSpeech[currentLang], currentLang, ()=>{
     playIcon.className = 'fa-solid fa-volume-high text-white text-xl';
     playLabel.textContent = 'Play Audio';
   });
@@ -955,10 +1084,10 @@ async function runDemo(){
   await wait(1300);
 
   // 2. scan
-  await new Promise(res=>{ runScanAnimation(()=>res()); });
+  await runScanAnimation();
 
-  // 3. diagnosis + treatment screen
-  showScreen('treatment');
+  // 3. diagnosis + treatment screen (kept deterministic for a predictable demo)
+  showTreatmentWithDiagnosis(diseases[0]);
   await wait(900);
 
   // 4. play audio (Hindi)
@@ -966,7 +1095,7 @@ async function runDemo(){
   await new Promise(res=>{
     playIcon.className = 'fa-solid fa-volume-high text-white text-xl animate-pulse';
     playLabel.textContent = 'चल रहा है…';
-    speak(treatmentSpeech.hi, 'hi', ()=>{
+    speak(currentDiagnosisSpeech.hi, 'hi', ()=>{
       playIcon.className = 'fa-solid fa-volume-high text-white text-xl';
       playLabel.textContent = 'Play Audio';
       res();
