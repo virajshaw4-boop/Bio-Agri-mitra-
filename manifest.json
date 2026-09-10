@@ -1,0 +1,16 @@
+{
+  "name": "Bio-Agri Mitra",
+  "short_name": "Agri Mitra",
+  "description": "Zero-text agro assistant for low-literacy farmers — voice diagnosis, treatment guidance, crop lifecycle lessons, nearby help, offers and loans.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBF5E9",
+  "theme_color": "#173B2C",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

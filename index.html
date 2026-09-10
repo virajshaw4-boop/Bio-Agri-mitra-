@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bio-Agri Mitra — Zero-Text Agro App</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#173B2C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Agri Mitra">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --forest:#173B2C;
+    --leaf:#3F8F5F;
+    --leaf-deep:#2C6E47;
+    --leaf-light:#BFE3C9;
+    --turmeric:#E7A32C;
+    --turmeric-deep:#C4841A;
+    --soil:#7A4B23;
+    --cream:#FBF5E9;
+    --paper:#FFFEFB;
+    --alert:#D14343;
+    --sky:#4F82A6;
+  }
+  *{ font-family:'Baloo 2', system-ui, sans-serif; }
+  html,body{ height:100%; }
+  body{
+    background:
+      radial-gradient(circle at 15% 10%, #EFE3C4 0%, transparent 45%),
+      radial-gradient(circle at 85% 85%, #D9E9D3 0%, transparent 45%),
+      linear-gradient(160deg, #F3ECDA 0%, #E7EFE2 55%, #DCE9DC 100%);
+    min-height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 12px;
+  }
+
+  /* ---------- PHONE FRAME ---------- */
+  .phone{
+    width:390px;
+    max-width:100vw;
+    height:820px;
+    max-height:94vh;
+    background:linear-gradient(155deg,#233B2E,#0F211A);
+    border-radius:48px;
+    padding:14px;
+    box-shadow: 0 40px 70px -25px rgba(23,59,44,.45), 0 0 0 1px rgba(0,0,0,.08);
+    position:relative;
+  }
+  .phone-screen{
+    width:100%; height:100%;
+    background:var(--cream);
+    border-radius:36px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .notch{
+    position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:120px; height:22px; background:#0F211A; border-radius:0 0 16px 16px; z-index:50;
+  }
+  .statusbar{
+    height:34px; flex:none; display:flex; align-items:center; justify-content:space-between;
+    padding:0 26px; font-size:12px; font-weight:700; color:var(--forest); opacity:.75;
+  }
+
+  /* ---------- SCREENS ---------- */
+  .screen{
+    position:absolute; inset:0; top:34px; bottom:78px;
+    overflow-y:auto; overflow-x:hidden;
+    -ms-overflow-style:none; scrollbar-width:none;
+    padding: 14px 18px 24px;
+    opacity:0; pointer-events:none;
+    transform: translateY(14px) scale(.985);
+    transition: opacity .32s ease, transform .32s ease;
+  }
+  .screen::-webkit-scrollbar{ display:none; }
+  .screen.active{
+    opacity:1; pointer-events:auto; transform:translateY(0) scale(1);
+  }
+  .screen-body{ flex:1; position:relative; }
+
+  /* ---------- BOTTOM NAV ---------- */
+  .bottomnav{
+    position:absolute; left:14px; right:14px; bottom:14px; height:64px;
+    background:var(--paper);
+    border-radius:26px;
+    display:flex; align-items:center; justify-content:space-around;
+    box-shadow: 0 10px 24px -8px rgba(23,59,44,.28);
+    z-index:40;
+  }
+  .navbtn{
+    width:64px; height:64px; border-radius:22px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; color:#9CB3A4; background:transparent; transition:.22s;
+  }
+  .navbtn.active{
+    background:var(--leaf); color:#fff;
+    box-shadow: 0 8px 16px -4px rgba(63,143,95,.55);
+    transform:translateY(-6px);
+  }
+  .navbtn:active{ transform:scale(.9); }
+
+  /* ---------- SHARED UI ---------- */
+  .card{
+    background:var(--paper);
+    border-radius:26px;
+    box-shadow: 0 8px 24px -10px rgba(23,59,44,.18);
+  }
+  .btn-press:active{ transform:scale(.94); }
+  .btn-press{ transition: transform .12s ease; }
+
+  /* mic pulse */
+  .mic-ring{
+    position:absolute; inset:0; border-radius:9999px;
+    border:3px solid var(--leaf);
+    animation: micpulse 2.6s ease-out infinite;
+  }
+  .mic-ring.ring2{ animation-delay:.9s; }
+  .mic-ring.ring3{ animation-delay:1.8s; }
+  @keyframes micpulse{
+    0%{ transform:scale(.78); opacity:.65; }
+    75%{ transform:scale(1.55); opacity:0; }
+    100%{ opacity:0; }
+  }
+  .mic-btn{
+    width:168px; height:168px; border-radius:9999px;
+    background:radial-gradient(circle at 32% 28%, #58B27C, var(--leaf-deep) 78%);
+    box-shadow: 0 18px 30px -10px rgba(44,110,71,.65), inset 0 -6px 12px rgba(0,0,0,.15);
+    display:flex; align-items:center; justify-content:center;
+    font-size:58px; color:#fff;
+  }
+  .mic-btn.listening{ animation: micbeat 1s ease-in-out infinite; }
+  @keyframes micbeat{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.06);} }
+
+  /* scan beam */
+  .scan-beam{
+    position:absolute; left:8%; right:8%; height:4px; border-radius:4px;
+    background: linear-gradient(90deg, transparent, #7BE0A6, transparent);
+    box-shadow: 0 0 14px 3px rgba(123,224,166,.9);
+    animation: sweep 1.7s ease-in-out infinite;
+  }
+  @keyframes sweep{
+    0%{ top:10%; opacity:.2; } 50%{ top:88%; opacity:1;} 100%{ top:10%; opacity:.2;}
+  }
+
+  /* generic pop-in */
+  .pop-in{ animation: popin .42s cubic-bezier(.2,.9,.3,1.25) both; }
+  @keyframes popin{ from{ opacity:0; transform:translateY(10px) scale(.96);} to{opacity:1; transform:none;} }
+
+  .press-scale{ transition: transform .15s ease; }
+  .press-scale:active{ transform:scale(.93); }
+
+  /* toast */
+  #toast-wrap{ position:absolute; left:0; right:0; top:44px; z-index:60; display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none;}
+  .toast{
+    background:rgba(23,59,44,.94); color:#fff; font-weight:600; font-size:13px;
+    padding:10px 18px; border-radius:999px; box-shadow:0 8px 18px -6px rgba(0,0,0,.35);
+    animation: toastin .28s ease, toastout .3s ease 2.3s forwards;
+    display:flex; align-items:center; gap:8px; max-width:88%;
+  }
+  @keyframes toastin{ from{opacity:0; transform:translateY(-8px);} to{opacity:1; transform:none;} }
+  @keyframes toastout{ to{opacity:0; transform:translateY(-8px);} }
+
+  /* lifecycle path */
+  .stage-dot{ transition: transform .3s cubic-bezier(.2,.9,.3,1.3), box-shadow .3s; }
+  .stage-dot.selected{ transform:scale(1.18); box-shadow:0 14px 26px -8px rgba(23,59,44,.4); }
+  .dash{ stroke-dasharray:10 10; animation: dashmove 1.6s linear infinite; }
+  @keyframes dashmove{ to{ stroke-dashoffset:-40; } }
+
+  .speak-eq span{ display:inline-block; width:4px; margin:0 1.5px; background:#fff; border-radius:3px; animation: eq 0.9s ease-in-out infinite; }
+  .speak-eq span:nth-child(2){ animation-delay:.15s; } .speak-eq span:nth-child(3){ animation-delay:.3s; } .speak-eq span:nth-child(4){ animation-delay:.45s; }
+  @keyframes eq{ 0%,100%{ height:6px;} 50%{ height:18px;} }
+
+  .demo-fab{
+    position:absolute; top:40px; right:12px; z-index:55; width:34px; height:34px; border-radius:999px;
+    background:rgba(23,59,44,.12); color:var(--forest); font-size:12px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .lang-pill.active{ background:var(--leaf); color:#fff; box-shadow:0 6px 14px -4px rgba(63,143,95,.5); }
+  .lang-pill{ transition:.2s; }
+
+  .sev-leaf{ font-size:15px; color:#E4E4E4; }
+  .sev-leaf.on{ color:var(--turmeric-deep); }
+  .sev-leaf.on.bad{ color:var(--alert); }
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="phone-screen" id="phoneScreen">
+
+    <div class="statusbar">
+      <span>9:41</span>
+      <span class="flex items-center gap-1.5"><i class="fa-solid fa-signal"></i><i class="fa-solid fa-wifi"></i><i class="fa-solid fa-battery-three-quarters"></i></span>
+    </div>
+
+    <div id="toast-wrap"></div>
+
+    <!-- hidden file input for optional real camera capture -->
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+
+    <!-- =================== SCREEN 1 : SCAN / HOME =================== -->
+    <section class="screen active" id="screen-home">
+
+      <button class="demo-fab press-scale" id="demoBtn" title="Demo walkthrough" aria-label="Run demo">
+        <i class="fa-solid fa-play"></i>
+      </button>
+
+      <!-- weather widget -->
+      <div class="card flex items-center justify-between px-5 py-3 mb-5 pop-in">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-sun text-2xl" style="color:var(--turmeric)"></i>
+          <span class="text-xl font-bold" style="color:var(--forest)">29°C</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-sm" style="color:var(--sky)">
+          <i class="fa-solid fa-droplet"></i><span class="font-semibold">Medium</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-sm" style="color:var(--soil)">
+          <i class="fa-solid fa-wind"></i><span class="font-semibold">12km/h</span>
+        </div>
+      </div>
+
+      <!-- mic section -->
+      <div class="flex flex-col items-center mt-2 mb-6">
+        <div class="relative flex items-center justify-center" style="width:210px; height:210px;">
+          <div class="mic-ring ring1"></div>
+          <div class="mic-ring ring2"></div>
+          <div class="mic-ring ring3"></div>
+          <button id="micBtn" class="mic-btn press-scale relative z-10" aria-label="Speak your problem">
+            <i class="fa-solid fa-microphone" id="micIcon"></i>
+          </button>
+        </div>
+        <div id="micStatus" class="mt-3 text-sm font-bold h-5" style="color:var(--leaf-deep)"></div>
+
+        <div id="transcriptCard" class="card w-full px-5 py-4 mt-3 hidden pop-in">
+          <div class="flex items-center gap-2 mb-1" style="color:var(--soil)">
+            <i class="fa-solid fa-comment-dots"></i>
+            <span class="text-xs font-bold uppercase tracking-wide opacity-70">Aapne kaha</span>
+          </div>
+          <p id="transcriptText" class="text-lg font-semibold" style="color:var(--forest)"></p>
+        </div>
+      </div>
+
+      <!-- camera scan -->
+      <button id="scanBtn" class="w-full press-scale flex items-center gap-4 rounded-3xl px-5 py-4"
+        style="background:linear-gradient(135deg,var(--turmeric),var(--turmeric-deep)); box-shadow:0 14px 24px -10px rgba(196,132,26,.55);">
+        <div class="w-14 h-14 rounded-2xl bg-white/25 flex items-center justify-center text-2xl text-white">
+          <i class="fa-solid fa-camera-retro"></i>
+        </div>
+        <div class="text-left">
+          <div class="text-white font-extrabold text-lg leading-tight">Patti Scan Karein</div>
+          <div class="text-white/85 text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-leaf"></i> Scan a leaf</div>
+        </div>
+        <i class="fa-solid fa-chevron-right text-white/70 ml-auto text-xl"></i>
+      </button>
+
+      <!-- quick illustration -->
+      <div class="mt-7 flex items-center justify-center gap-6 opacity-90">
+        <i class="fa-solid fa-cloud-sun text-3xl" style="color:var(--sky)"></i>
+        <i class="fa-solid fa-seedling text-3xl" style="color:var(--leaf)"></i>
+        <i class="fa-solid fa-tractor text-3xl" style="color:var(--soil)"></i>
+        <i class="fa-solid fa-wheat-awn text-3xl" style="color:var(--turmeric-deep)"></i>
+      </div>
+
+      <!-- developer / demo note -->
+      <div class="mt-8 mb-2 text-[10.5px] leading-snug text-center px-2" style="color:#8AA192;">
+        <i class="fa-solid fa-circle-info mr-1"></i>
+        Developer note — Voice: Web Speech API (SpeechRecognition, hi-IN). Audio guidance: SpeechSynthesis API.
+        Leaf scan &amp; diagnosis are <b>simulated (Demo Diagnosis)</b> — no ML model or backend is used.
+        Tap the ▶ icon top-right for an auto-play demo.
+      </div>
+    </section>
+
+    <!-- scanning overlay (shown over home during "scan") -->
+    <div id="scanOverlay" class="absolute inset-0 z-30 hidden flex-col items-center justify-center" style="top:34px; bottom:78px; background:rgba(23,59,44,.92);">
+      <div class="relative w-48 h-48 rounded-3xl overflow-hidden" style="background:linear-gradient(160deg,#2C6E47,#173B2C);">
+        <i class="fa-solid fa-leaf absolute inset-0 flex items-center justify-center text-8xl" style="color:#7BE0A6; opacity:.85;"></i>
+        <div class="scan-beam"></div>
+      </div>
+      <div class="mt-5 text-white font-bold text-lg flex items-center gap-2">
+        <i class="fa-solid fa-magnifying-glass animate-pulse"></i> Scanning…
+      </div>
+      <div class="text-white/60 text-xs mt-1 font-semibold">Demo scan — no real image analysis</div>
+    </div>
+
+    <!-- =================== SCREEN 2 : DIAGNOSIS & TREATMENT =================== -->
+    <section class="screen" id="screen-treatment">
+
+      <div class="flex items-center gap-3 mb-4">
+        <button class="navbtn-back w-10 h-10 rounded-xl flex items-center justify-center press-scale" style="background:var(--paper); color:var(--forest);" onclick="goHome()">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="flex items-center gap-2 text-sm font-extrabold" style="color:var(--forest)">
+          <i class="fa-solid fa-stethoscope"></i> Nidan
+        </div>
+      </div>
+
+      <!-- diagnosis card -->
+      <div class="card p-5 pop-in">
+        <div class="flex items-center gap-4">
+          <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl flex-none" style="background:var(--leaf-light); color:var(--leaf-deep);">
+            <i class="fa-solid fa-leaf"></i>
+          </div>
+          <div class="flex-1">
+            <div class="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full mb-1" style="background:#FBE7C6; color:var(--turmeric-deep);">
+              <i class="fa-solid fa-flask"></i> DEMO DIAGNOSIS
+            </div>
+            <div class="text-lg font-extrabold leading-tight" style="color:var(--forest)">Fungal Leaf Spot</div>
+            <div class="text-xs font-semibold" style="color:var(--soil)">फंगल लीफ स्पॉट</div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-4 pt-4" style="border-top:1.5px dashed #E4DCC8;">
+          <div class="text-xs font-bold" style="color:var(--soil)">Severity</div>
+          <div class="flex gap-1">
+            <i class="fa-solid fa-leaf sev-leaf on"></i>
+            <i class="fa-solid fa-leaf sev-leaf on"></i>
+            <i class="fa-solid fa-leaf sev-leaf"></i>
+            <i class="fa-solid fa-leaf sev-leaf"></i>
+          </div>
+          <div class="text-xs font-extrabold px-2.5 py-1 rounded-full" style="background:#FBE7C6; color:var(--turmeric-deep);">Moderate</div>
+        </div>
+      </div>
+
+      <!-- audio guided treatment -->
+      <div class="flex items-center gap-2 mt-6 mb-3 px-1">
+        <i class="fa-solid fa-book-open-reader" style="color:var(--leaf-deep)"></i>
+        <span class="text-sm font-extrabold uppercase tracking-wide" style="color:var(--forest)">Audio Guided Treatment</span>
+      </div>
+
+      <div class="grid grid-cols-4 gap-2.5 mb-4">
+        <div class="card flex flex-col items-center justify-center py-4 gap-1.5">
+          <i class="fa-solid fa-leaf text-2xl" style="color:var(--leaf-deep)"></i>
+          <span class="text-[10px] font-bold" style="color:var(--soil)">Neem</span>
+        </div>
+        <div class="card flex flex-col items-center justify-center py-4 gap-1.5">
+          <i class="fa-solid fa-droplet text-2xl" style="color:var(--sky)"></i>
+          <span class="text-[10px] font-bold" style="color:var(--soil)">Mix water</span>
+        </div>
+        <div class="card flex flex-col items-center justify-center py-4 gap-1.5">
+          <i class="fa-solid fa-spray-can text-2xl" style="color:var(--turmeric-deep)"></i>
+          <span class="text-[10px] font-bold" style="color:var(--soil)">Fill bottle</span>
+        </div>
+        <div class="card flex flex-col items-center justify-center py-4 gap-1.5">
+          <i class="fa-solid fa-wheat-awn text-2xl" style="color:var(--leaf)"></i>
+          <span class="text-[10px] font-bold" style="color:var(--soil)">Spray plant</span>
+        </div>
+      </div>
+
+      <!-- language toggle -->
+      <div class="flex gap-2 mb-4">
+        <button class="lang-pill active flex-1 py-2.5 rounded-2xl font-extrabold text-sm press-scale" data-lang="hi" onclick="setLang('hi')" style="background:var(--leaf); color:#fff;">
+          🇮🇳 हिंदी
+        </button>
+        <button class="lang-pill flex-1 py-2.5 rounded-2xl font-extrabold text-sm press-scale" data-lang="en" onclick="setLang('en')" style="background:var(--paper); color:var(--forest);">
+          🇬🇧 English
+        </button>
+      </div>
+
+      <!-- play audio -->
+      <button id="playAudioBtn" class="w-full press-scale flex items-center justify-center gap-3 rounded-3xl py-4 mb-4"
+        style="background:linear-gradient(135deg,#58B27C,var(--leaf-deep)); box-shadow:0 14px 24px -10px rgba(44,110,71,.55);">
+        <i class="fa-solid fa-volume-high text-white text-xl" id="playIcon"></i>
+        <span class="text-white font-extrabold text-base" id="playLabel">Play Audio</span>
+      </button>
+
+      <!-- safety -->
+      <div class="rounded-2xl px-4 py-3 flex items-center gap-3 mb-4" style="background:#FBEAEA;">
+        <i class="fa-solid fa-triangle-exclamation text-xl" style="color:var(--alert)"></i>
+        <div class="text-[11px] font-bold leading-snug" style="color:#8C2E2E;">
+          Follow the product label &amp; local agricultural advice.<br>उत्पाद लेबल व स्थानीय कृषि सलाह का पालन करें।
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== SCREEN 3 : KISAN PAATHSHALA =================== -->
+    <section class="screen" id="screen-paathshala">
+
+      <div class="flex items-center justify-center gap-2 mt-1 mb-6">
+        <i class="fa-solid fa-book-open text-2xl" style="color:var(--soil)"></i>
+        <i class="fa-solid fa-seedling text-2xl" style="color:var(--leaf-deep)"></i>
+      </div>
+
+      <div class="relative" style="height:420px;">
+        <svg class="absolute inset-0" width="100%" height="420" viewBox="0 0 320 420" fill="none">
+          <path d="M 60 55 C 220 55, 60 165, 220 165 C 380 165, 60 275, 220 275 C 380 275, 60 385, 220 385"
+            stroke="#CFE3D2" stroke-width="6" stroke-linecap="round"/>
+          <path id="lifecyclePath" d="M 60 55 C 220 55, 60 165, 220 165 C 380 165, 60 275, 220 275 C 380 275, 60 385, 220 385"
+            stroke="var(--leaf)" stroke-width="6" stroke-linecap="round" class="dash" fill="none" opacity=".85"/>
+        </svg>
+
+        <button class="stage-dot absolute press-scale flex flex-col items-center justify-center rounded-full pop-in" data-stage="0"
+          style="left:20px; top:22px; width:76px; height:76px; background:#DFF3E4;">
+          <i class="fa-solid fa-seedling text-2xl" style="color:var(--leaf-deep)"></i>
+        </button>
+        <button class="stage-dot absolute press-scale flex flex-col items-center justify-center rounded-full pop-in" data-stage="1"
+          style="left:180px; top:132px; width:76px; height:76px; background:#DCEBF3;">
+          <i class="fa-solid fa-droplet text-2xl" style="color:var(--sky)"></i>
+        </button>
+        <button class="stage-dot absolute press-scale flex flex-col items-center justify-center rounded-full pop-in" data-stage="2"
+          style="left:20px; top:242px; width:76px; height:76px; background:#FCEAD1;">
+          <i class="fa-solid fa-fan text-2xl" style="color:var(--turmeric-deep)"></i>
+        </button>
+        <button class="stage-dot absolute press-scale flex flex-col items-center justify-center rounded-full pop-in" data-stage="3"
+          style="left:180px; top:352px; width:76px; height:76px; background:#F3E4D2;">
+          <i class="fa-solid fa-wheat-awn text-2xl" style="color:var(--soil)"></i>
+        </button>
+
+        <span class="absolute text-[11px] font-extrabold" style="left:16px; top:100px; color:var(--leaf-deep);">Sowing</span>
+        <span class="absolute text-[11px] font-extrabold" style="left:176px; top:210px; color:var(--sky);">Irrigation</span>
+        <span class="absolute text-[11px] font-extrabold" style="left:16px; top:320px; color:var(--turmeric-deep);">Bloom</span>
+        <span class="absolute text-[11px] font-extrabold" style="left:176px; top:430px; color:var(--soil);">Harvest</span>
+      </div>
+
+      <div id="stageCard" class="card p-5 mt-2 hidden pop-in">
+        <div class="flex items-center gap-3">
+          <div id="stageIconWrap" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl flex-none">
+            <i id="stageIcon" class="fa-solid fa-seedling"></i>
+          </div>
+          <div>
+            <div id="stageTitle" class="font-extrabold text-base" style="color:var(--forest)"></div>
+            <div id="stageSub" class="text-xs font-semibold" style="color:var(--soil)"></div>
+          </div>
+          <div class="ml-auto flex items-center gap-1 px-3 py-2 rounded-full" style="background:var(--leaf-light);">
+            <div class="speak-eq flex items-end h-4" id="stageEq">
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== SCREEN 4 : MORE (menu) =================== -->
+    <section class="screen" id="screen-more">
+      <div class="flex items-center justify-center gap-2 mt-1 mb-7">
+        <i class="fa-solid fa-border-all text-2xl" style="color:var(--forest)"></i>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <button class="card press-scale flex flex-col items-center justify-center py-7 gap-3 pop-in" onclick="showScreen('map','more')">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background:#DCEBF3; color:var(--sky);">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </div>
+          <span class="text-xs font-extrabold" style="color:var(--forest)">Naksha</span>
+        </button>
+        <button class="card press-scale flex flex-col items-center justify-center py-7 gap-3 pop-in" onclick="showScreen('offers','more')">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background:#FCEAD1; color:var(--turmeric-deep);">
+            <i class="fa-solid fa-tags"></i>
+          </div>
+          <span class="text-xs font-extrabold" style="color:var(--forest)">Offers</span>
+        </button>
+        <button class="card press-scale flex flex-col items-center justify-center py-7 gap-3 pop-in" onclick="showScreen('loans','more')">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background:#E4DCF3; color:#6A4FA0;">
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+          </div>
+          <span class="text-xs font-extrabold" style="color:var(--forest)">Loans</span>
+        </button>
+        <button class="card press-scale flex flex-col items-center justify-center py-7 gap-3 pop-in" onclick="showScreen('home')">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background:var(--leaf-light); color:var(--leaf-deep);">
+            <i class="fa-solid fa-house"></i>
+          </div>
+          <span class="text-xs font-extrabold" style="color:var(--forest)">Home</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- =================== SCREEN 5 : MAP (nearby help) =================== -->
+    <section class="screen" id="screen-map">
+      <div class="flex items-center gap-3 mb-4">
+        <button class="w-10 h-10 rounded-xl flex items-center justify-center press-scale" style="background:var(--paper); color:var(--forest);" onclick="showScreen('more')">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="flex items-center gap-2 text-sm font-extrabold" style="color:var(--forest)">
+          <i class="fa-solid fa-map-location-dot"></i> Aas-paas
+        </div>
+      </div>
+
+      <div class="card relative overflow-hidden" style="height:340px; background:linear-gradient(160deg,#E4F0E6,#CFE3D2);">
+        <svg class="absolute inset-0" width="100%" height="340" viewBox="0 0 320 340" fill="none">
+          <path d="M0 90 H320 M0 210 H320 M100 0 V340 M230 0 V340" stroke="#B9D2BC" stroke-width="3"/>
+          <path d="M0 150 C 90 170, 180 60, 320 120" stroke="#AEC9B2" stroke-width="10" stroke-linecap="round"/>
+        </svg>
+        <!-- you are here -->
+        <div class="absolute" style="left:150px; top:158px;">
+          <div class="w-5 h-5 rounded-full" style="background:var(--sky); box-shadow:0 0 0 6px rgba(79,130,166,.28);"></div>
+        </div>
+
+        <button class="map-pin absolute press-scale flex items-center justify-center rounded-full pop-in" data-pin="0"
+          style="left:36px; top:56px; width:52px; height:52px; background:var(--leaf); color:#fff; box-shadow:0 10px 18px -6px rgba(44,110,71,.5);">
+          <i class="fa-solid fa-shop"></i>
+        </button>
+        <button class="map-pin absolute press-scale flex items-center justify-center rounded-full pop-in" data-pin="1"
+          style="left:224px; top:44px; width:52px; height:52px; background:#6A4FA0; color:#fff; box-shadow:0 10px 18px -6px rgba(106,79,160,.5);">
+          <i class="fa-solid fa-building-columns"></i>
+        </button>
+        <button class="map-pin absolute press-scale flex items-center justify-center rounded-full pop-in" data-pin="2"
+          style="left:60px; top:238px; width:52px; height:52px; background:var(--turmeric-deep); color:#fff; box-shadow:0 10px 18px -6px rgba(196,132,26,.5);">
+          <i class="fa-solid fa-cart-shopping"></i>
+        </button>
+        <button class="map-pin absolute press-scale flex items-center justify-center rounded-full pop-in" data-pin="3"
+          style="left:236px; top:250px; width:52px; height:52px; background:var(--alert); color:#fff; box-shadow:0 10px 18px -6px rgba(209,67,67,.5);">
+          <i class="fa-solid fa-paw"></i>
+        </button>
+      </div>
+
+      <div id="pinCard" class="card p-5 mt-4 hidden pop-in">
+        <div class="flex items-center gap-3">
+          <div id="pinIconWrap" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl flex-none">
+            <i id="pinIcon" class="fa-solid fa-shop"></i>
+          </div>
+          <div>
+            <div id="pinTitle" class="font-extrabold text-base" style="color:var(--forest)"></div>
+            <div id="pinDist" class="text-xs font-semibold" style="color:var(--soil)"></div>
+          </div>
+          <div class="ml-auto flex items-center gap-1 px-3 py-2 rounded-full" style="background:var(--leaf-light);">
+            <div class="speak-eq flex items-end h-4" id="pinEq"><span></span><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== SCREEN 6 : OFFERS =================== -->
+    <section class="screen" id="screen-offers">
+      <div class="flex items-center gap-3 mb-4">
+        <button class="w-10 h-10 rounded-xl flex items-center justify-center press-scale" style="background:var(--paper); color:var(--forest);" onclick="showScreen('more')">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="flex items-center gap-2 text-sm font-extrabold" style="color:var(--forest)">
+          <i class="fa-solid fa-tags"></i> Yojnayein
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3" id="offerList">
+        <button class="offer-card card press-scale flex items-center gap-4 p-4 text-left" data-offer="0">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-none" style="background:#DFF3E4; color:var(--leaf-deep);">
+            <i class="fa-solid fa-sack-dollar"></i>
+          </div>
+          <div class="flex-1">
+            <div class="font-extrabold text-sm" style="color:var(--forest)">PM-Kisan</div>
+            <div class="text-[11px] font-semibold" style="color:var(--soil)">₹6,000 / year</div>
+          </div>
+          <span class="text-[9px] font-extrabold px-2 py-1 rounded-full" style="background:var(--leaf); color:#fff;">NEW</span>
+        </button>
+
+        <button class="offer-card card press-scale flex items-center gap-4 p-4 text-left" data-offer="1">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-none" style="background:#FCEAD1; color:var(--turmeric-deep);">
+            <i class="fa-solid fa-flask"></i>
+          </div>
+          <div class="flex-1">
+            <div class="font-extrabold text-sm" style="color:var(--forest)">Khaad Subsidy</div>
+            <div class="text-[11px] font-semibold" style="color:var(--soil)">Fertilizer support</div>
+          </div>
+        </button>
+
+        <button class="offer-card card press-scale flex items-center gap-4 p-4 text-left" data-offer="2">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-none" style="background:#DCEBF3; color:var(--sky);">
+            <i class="fa-solid fa-tractor"></i>
+          </div>
+          <div class="flex-1">
+            <div class="font-extrabold text-sm" style="color:var(--forest)">Yantra Rent Chhoot</div>
+            <div class="text-[11px] font-semibold" style="color:var(--soil)">Equipment discount</div>
+          </div>
+        </button>
+
+        <button class="offer-card card press-scale flex items-center gap-4 p-4 text-left" data-offer="3">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-none" style="background:#F3E4D2; color:var(--soil);">
+            <i class="fa-solid fa-seedling"></i>
+          </div>
+          <div class="flex-1">
+            <div class="font-extrabold text-sm" style="color:var(--forest)">Beej Subsidy</div>
+            <div class="text-[11px] font-semibold" style="color:var(--soil)">Seed support</div>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- =================== SCREEN 7 : LOANS =================== -->
+    <section class="screen" id="screen-loans">
+      <div class="flex items-center gap-3 mb-4">
+        <button class="w-10 h-10 rounded-xl flex items-center justify-center press-scale" style="background:var(--paper); color:var(--forest);" onclick="showScreen('more')">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="flex items-center gap-2 text-sm font-extrabold" style="color:var(--forest)">
+          <i class="fa-solid fa-hand-holding-dollar"></i> Loan
+        </div>
+      </div>
+
+      <!-- existing loan status -->
+      <div class="card p-5 mb-4 pop-in">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl flex-none" style="background:#E4DCF3; color:#6A4FA0;">
+            <i class="fa-solid fa-credit-card"></i>
+          </div>
+          <div>
+            <div class="font-extrabold text-sm" style="color:var(--forest)">Kisan Credit Card</div>
+            <div class="text-[11px] font-semibold" style="color:var(--soil)">Active loan</div>
+          </div>
+          <div class="ml-auto flex items-center gap-1.5 text-xs font-extrabold" style="color:var(--soil)">
+            <i class="fa-regular fa-calendar"></i> 12 Oct
+          </div>
+        </div>
+        <div class="w-full h-3 rounded-full" style="background:#EDE7D8;">
+          <div class="h-3 rounded-full" style="width:62%; background:linear-gradient(90deg,var(--leaf),var(--leaf-deep));"></div>
+        </div>
+        <div class="flex items-center justify-between mt-2 text-[10px] font-bold" style="color:var(--soil)">
+          <span>Chukaaya gaya · Paid</span><span>62%</span>
+        </div>
+        <button id="payNowBtn" class="w-full press-scale flex items-center justify-center gap-2 rounded-2xl py-3 mt-4"
+          style="background:var(--forest);">
+          <i class="fa-solid fa-indian-rupee-sign text-white"></i>
+          <span class="text-white font-extrabold text-sm">Pay Now</span>
+        </button>
+      </div>
+
+      <!-- eligibility check -->
+      <div class="card p-5 pop-in">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="fa-solid fa-magnifying-glass-dollar" style="color:var(--leaf-deep)"></i>
+          <span class="text-xs font-extrabold uppercase tracking-wide" style="color:var(--forest)">Nayi Loan Patrata</span>
+        </div>
+
+        <div id="eligIdle">
+          <button id="checkEligBtn" class="w-full press-scale flex items-center justify-center gap-3 rounded-3xl py-4"
+            style="background:linear-gradient(135deg,#58B27C,var(--leaf-deep)); box-shadow:0 14px 24px -10px rgba(44,110,71,.55);">
+            <i class="fa-solid fa-list-check text-white text-lg"></i>
+            <span class="text-white font-extrabold text-sm">Check Eligibility</span>
+          </button>
+        </div>
+
+        <div id="eligLoading" class="hidden flex-col items-center py-4 gap-2">
+          <i class="fa-solid fa-spinner fa-spin text-2xl" style="color:var(--leaf-deep)"></i>
+          <span class="text-xs font-bold" style="color:var(--soil)">Jaanch ho rahi hai…</span>
+        </div>
+
+        <div id="eligResult" class="hidden flex-col items-center gap-3 py-2 pop-in">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center text-3xl" style="background:var(--leaf-light); color:var(--leaf-deep);">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div class="text-sm font-extrabold" style="color:var(--forest)">Eligible / पात्र</div>
+          <div class="flex items-center gap-1">
+            <i class="fa-solid fa-indian-rupee-sign sev-leaf on"></i>
+            <i class="fa-solid fa-indian-rupee-sign sev-leaf on"></i>
+            <i class="fa-solid fa-indian-rupee-sign sev-leaf on"></i>
+            <i class="fa-solid fa-indian-rupee-sign sev-leaf"></i>
+          </div>
+          <div class="text-[11px] font-semibold" style="color:var(--soil)">₹30,000 – ₹75,000</div>
+          <button id="applyLoanBtn" class="w-full press-scale flex items-center justify-center gap-2 rounded-2xl py-3"
+            style="background:var(--turmeric-deep);">
+            <i class="fa-solid fa-paper-plane text-white"></i>
+            <span class="text-white font-extrabold text-sm">Apply Now</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== BOTTOM NAV =================== -->
+    <div class="bottomnav">
+      <button class="navbtn active press-scale" data-screen="home" aria-label="Scan"><i class="fa-solid fa-house"></i></button>
+      <button class="navbtn press-scale" data-screen="treatment" aria-label="Treatment"><i class="fa-solid fa-seedling"></i></button>
+      <button class="navbtn press-scale" data-screen="paathshala" aria-label="Paathshala"><i class="fa-solid fa-book-open"></i></button>
+      <button class="navbtn press-scale" data-screen="more" aria-label="More"><i class="fa-solid fa-border-all"></i></button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ==================================================================
+   BIO-AGRI MITRA — prototype logic
+   APIs used:
+     - Web Speech API (SpeechRecognition) for farmer voice input (hi-IN)
+     - SpeechSynthesis API for spoken guidance (Hindi / English)
+     - <input type="file" capture="environment"> for optional real camera capture
+   Everything else (diagnosis, disease detection) is SIMULATED for the demo.
+   ================================================================== */
+
+let currentLang = 'hi';
+let currentScreen = 'home';
+
+/* ---------------- toast ---------------- */
+function toast(msg, icon='fa-circle-check'){
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<i class="fa-solid ${icon}"></i><span>${msg}</span>`;
+  wrap.appendChild(el);
+  setTimeout(()=> el.remove(), 2700);
+}
+
+/* ---------------- screen navigation ---------------- */
+function showScreen(name, navName){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  const activeNav = navName || name;
+  document.querySelectorAll('.navbtn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.screen === activeNav);
+  });
+  currentScreen = name;
+}
+document.querySelectorAll('.navbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=> showScreen(btn.dataset.screen));
+});
+function goHome(){ showScreen('home'); }
+
+/* ==================================================================
+   MICROPHONE / SPEECH RECOGNITION
+   ================================================================== */
+const micBtn = document.getElementById('micBtn');
+const micStatus = document.getElementById('micStatus');
+const transcriptCard = document.getElementById('transcriptCard');
+const transcriptText = document.getElementById('transcriptText');
+
+const demoCommands = [
+  "मेरी फसल में कीड़े लग गए हैं",
+  "पत्ते पीले हो रहे हैं",
+  "How to protect my crop?"
+];
+
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+if (SpeechRecognitionAPI){
+  recognition = new SpeechRecognitionAPI();
+  recognition.lang = 'hi-IN';
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+}
+
+function startListeningUI(){
+  micBtn.classList.add('listening');
+  micStatus.textContent = 'Listening… / सुन रहे हैं…';
+  transcriptCard.classList.add('hidden');
+}
+function stopListeningUI(){
+  micBtn.classList.remove('listening');
+}
+function showTranscript(text){
+  transcriptText.textContent = text;
+  transcriptCard.classList.remove('hidden');
+  micStatus.textContent = 'समझ गया ✓';
+  setTimeout(()=>{ micStatus.textContent=''; }, 1800);
+}
+
+function runSimulatedListen(cb){
+  startListeningUI();
+  micStatus.textContent = 'Listening… / सुन रहे हैं…';
+  setTimeout(()=>{
+    micStatus.textContent = 'Processing… / समझ रहे हैं…';
+    setTimeout(()=>{
+      stopListeningUI();
+      const phrase = demoCommands[Math.floor(Math.random()*demoCommands.length)];
+      showTranscript(phrase);
+      if (cb) cb(phrase);
+    }, 900);
+  }, 1200);
+}
+
+micBtn.addEventListener('click', ()=>{
+  if (!recognition){
+    toast('Voice input not supported here — showing demo transcript', 'fa-triangle-exclamation');
+    runSimulatedListen();
+    return;
+  }
+  try{
+    startListeningUI();
+    recognition.start();
+  }catch(e){
+    // recognition already running or blocked — fall back to simulation
+    runSimulatedListen();
+  }
+});
+
+if (recognition){
+  recognition.onresult = (event)=>{
+    let text = '';
+    for (let i=0; i<event.results.length; i++){ text += event.results[i][0].transcript; }
+    micStatus.textContent = 'Hearing you… / सुन रहे हैं…';
+    if (event.results[event.results.length-1].isFinal){
+      stopListeningUI();
+      showTranscript(text);
+    }
+  };
+  recognition.onerror = ()=>{
+    stopListeningUI();
+    toast('Mic unavailable — showing demo transcript', 'fa-triangle-exclamation');
+    runSimulatedListen();
+  };
+  recognition.onend = ()=>{ stopListeningUI(); };
+}
+
+/* ==================================================================
+   LEAF SCAN (camera or simulated)
+   ================================================================== */
+const scanBtn = document.getElementById('scanBtn');
+const scanOverlay = document.getElementById('scanOverlay');
+const cameraInput = document.getElementById('cameraInput');
+
+function runScanAnimation(onDone){
+  scanOverlay.classList.remove('hidden');
+  scanOverlay.classList.add('flex');
+  setTimeout(()=>{
+    scanOverlay.classList.add('hidden');
+    scanOverlay.classList.remove('flex');
+    if (onDone) onDone();
+  }, 2200);
+}
+
+scanBtn.addEventListener('click', ()=>{
+  // Attempt real camera capture; whether or not a photo is chosen, the
+  // diagnosis shown is always the simulated demo result.
+  try{
+    cameraInput.value = '';
+    cameraInput.click();
+  }catch(e){
+    runScanAnimation(()=>{ showScreen('treatment'); toast('Demo diagnosis ready','fa-leaf'); });
+  }
+});
+cameraInput.addEventListener('change', ()=>{
+  runScanAnimation(()=>{ showScreen('treatment'); toast('Demo diagnosis ready','fa-leaf'); });
+});
+// If the user dismisses the camera picker without choosing anything,
+// still let them proceed via a simulated scan fallback after a pause.
+cameraInput.addEventListener('cancel', ()=>{
+  runScanAnimation(()=>{ showScreen('treatment'); toast('Demo diagnosis ready','fa-leaf'); });
+});
+
+/* ==================================================================
+   SPEECH SYNTHESIS — treatment audio + paathshala narration
+   ================================================================== */
+const treatmentSpeech = {
+  hi: "नीम आधारित घोल तैयार करें। पानी में उचित मात्रा में नीम तेल मिलाएं। घोल को अच्छी तरह मिलाकर प्रभावित पौधों की पत्तियों पर छिड़कें।",
+  en: "Prepare a neem-based solution. Mix the right amount of neem oil in water. Stir well and spray it on the affected leaves."
+};
+const stageData = [
+  { key:'sowing', icon:'fa-seedling', color:'var(--leaf-deep)', bg:'#DFF3E4',
+    title:{hi:'बुवाई', en:'Sowing'}, sub:{hi:'Sowing', en:'बुवाई'},
+    speech:{ hi:"बीज को उचित गहराई पर बोएं।", en:"Sow the seeds at the right depth." } },
+  { key:'irrigation', icon:'fa-droplet', color:'var(--sky)', bg:'#DCEBF3',
+    title:{hi:'सिंचाई', en:'Irrigation'}, sub:{hi:'Irrigation', en:'सिंचाई'},
+    speech:{ hi:"फसल की जरूरत के अनुसार पानी दें।", en:"Water the crop according to its needs." } },
+  { key:'bloom', icon:'fa-fan', color:'var(--turmeric-deep)', bg:'#FCEAD1',
+    title:{hi:'फूल आना', en:'Bloom'}, sub:{hi:'Bloom', en:'फूल आना'},
+    speech:{ hi:"फूल आने के समय पौधों की अच्छी देखभाल करें।", en:"Take good care of the plants during flowering." } },
+  { key:'harvest', icon:'fa-wheat-awn', color:'var(--soil)', bg:'#F3E4D2',
+    title:{hi:'कटाई', en:'Harvest'}, sub:{hi:'Harvest', en:'कटाई'},
+    speech:{ hi:"फसल तैयार होने पर सही समय पर कटाई करें।", en:"Harvest the crop at the right time when ready." } }
+];
+
+function speak(text, lang, onend){
+  if (!('speechSynthesis' in window)){
+    toast('Audio not supported on this browser', 'fa-triangle-exclamation');
+    if (onend) onend();
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
+  utter.rate = 0.95;
+  utter.onend = ()=>{ if (onend) onend(); };
+  utter.onerror = ()=>{ if (onend) onend(); };
+  window.speechSynthesis.speak(utter);
+}
+
+/* language toggle */
+function setLang(lang){
+  currentLang = lang;
+  document.querySelectorAll('.lang-pill').forEach(p=>{
+    const active = p.dataset.lang === lang;
+    p.classList.toggle('active', active);
+    p.style.background = active ? 'var(--leaf)' : 'var(--paper)';
+    p.style.color = active ? '#fff' : 'var(--forest)';
+  });
+}
+
+/* play audio button */
+const playBtn = document.getElementById('playAudioBtn');
+const playIcon = document.getElementById('playIcon');
+const playLabel = document.getElementById('playLabel');
+playBtn.addEventListener('click', ()=>{
+  playIcon.className = 'fa-solid fa-volume-high text-white text-xl animate-pulse';
+  playLabel.textContent = currentLang === 'hi' ? 'चल रहा है…' : 'Playing…';
+  speak(treatmentSpeech[currentLang], currentLang, ()=>{
+    playIcon.className = 'fa-solid fa-volume-high text-white text-xl';
+    playLabel.textContent = 'Play Audio';
+  });
+});
+
+/* ==================================================================
+   PAATHSHALA — lifecycle stages
+   ================================================================== */
+const stageCard = document.getElementById('stageCard');
+const stageIconWrap = document.getElementById('stageIconWrap');
+const stageIcon = document.getElementById('stageIcon');
+const stageTitle = document.getElementById('stageTitle');
+const stageSub = document.getElementById('stageSub');
+const stageEq = document.getElementById('stageEq');
+
+function selectStage(i, autoSpeak=true){
+  document.querySelectorAll('.stage-dot').forEach(d=>d.classList.remove('selected'));
+  const btn = document.querySelector(`.stage-dot[data-stage="${i}"]`);
+  btn.classList.add('selected');
+
+  const s = stageData[i];
+  stageIconWrap.style.background = s.bg;
+  stageIcon.className = 'fa-solid ' + s.icon;
+  stageIcon.style.color = s.color;
+  stageTitle.textContent = s.title[currentLang];
+  stageSub.textContent = s.sub[currentLang];
+  stageCard.classList.remove('hidden');
+  stageEq.style.opacity = 0;
+
+  if (autoSpeak){
+    stageEq.style.opacity = 1;
+    speak(s.speech[currentLang], currentLang, ()=>{ stageEq.style.opacity = 0; });
+  }
+}
+document.querySelectorAll('.stage-dot').forEach(btn=>{
+  btn.addEventListener('click', ()=> selectStage(parseInt(btn.dataset.stage)));
+});
+
+/* ==================================================================
+   DEMO MODE — auto-plays the full judge-facing walkthrough
+   ================================================================== */
+const demoBtn = document.getElementById('demoBtn');
+let demoRunning = false;
+
+function wait(ms){ return new Promise(res=>setTimeout(res, ms)); }
+
+async function runDemo(){
+  if (demoRunning) return;
+  demoRunning = true;
+  demoBtn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+  toast('Demo walkthrough started', 'fa-play');
+
+  showScreen('home');
+  await wait(500);
+
+  // 1. voice
+  await new Promise(res=>{ runSimulatedListen(()=>res()); });
+  await wait(1300);
+
+  // 2. scan
+  await new Promise(res=>{ runScanAnimation(()=>res()); });
+
+  // 3. diagnosis + treatment screen
+  showScreen('treatment');
+  await wait(900);
+
+  // 4. play audio (Hindi)
+  setLang('hi');
+  await new Promise(res=>{
+    playIcon.className = 'fa-solid fa-volume-high text-white text-xl animate-pulse';
+    playLabel.textContent = 'चल रहा है…';
+    speak(treatmentSpeech.hi, 'hi', ()=>{
+      playIcon.className = 'fa-solid fa-volume-high text-white text-xl';
+      playLabel.textContent = 'Play Audio';
+      res();
+    });
+  });
+  await wait(500);
+
+  // 5. paathshala walkthrough
+  showScreen('paathshala');
+  await wait(600);
+  for (let i=0; i<stageData.length; i++){
+    await new Promise(res=>{ selectStage(i); speak(stageData[i].speech.hi, 'hi', res); });
+    await wait(350);
+  }
+
+  toast('Demo complete ✓', 'fa-circle-check');
+  demoBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+  demoRunning = false;
+}
+demoBtn.addEventListener('click', runDemo);
+
+/* ==================================================================
+   MAP — nearby help pins
+   ================================================================== */
+const pinData = [
+  { icon:'fa-shop', color:'var(--leaf-deep)', bg:'#DFF3E4',
+    title:{hi:'कृषि केंद्र', en:'Agri Input Center'}, dist:'2.3 km',
+    speech:{ hi:"निकटतम कृषि केंद्र 2.3 किलोमीटर दूर है।", en:"The nearest agri input center is 2.3 kilometers away." } },
+  { icon:'fa-building-columns', color:'#6A4FA0', bg:'#E4DCF3',
+    title:{hi:'बैंक शाखा', en:'Bank Branch'}, dist:'3.5 km',
+    speech:{ hi:"बैंक शाखा 3.5 किलोमीटर दूर है, वहां लोन की जानकारी मिलेगी।", en:"The bank branch is 3.5 kilometers away — you can get loan information there." } },
+  { icon:'fa-cart-shopping', color:'var(--turmeric-deep)', bg:'#FCEAD1',
+    title:{hi:'मंडी', en:'Mandi / Market'}, dist:'1.8 km',
+    speech:{ hi:"मंडी 1.8 किलोमीटर दूर है।", en:"The market is 1.8 kilometers away." } },
+  { icon:'fa-paw', color:'var(--alert)', bg:'#FBEAEA',
+    title:{hi:'पशु चिकित्सक', en:'Vet Clinic'}, dist:'4.0 km',
+    speech:{ hi:"पशु चिकित्सक 4 किलोमीटर दूर है।", en:"The veterinary clinic is 4 kilometers away." } }
+];
+const pinCard = document.getElementById('pinCard');
+const pinIconWrap = document.getElementById('pinIconWrap');
+const pinIcon = document.getElementById('pinIcon');
+const pinTitle = document.getElementById('pinTitle');
+const pinDist = document.getElementById('pinDist');
+const pinEq = document.getElementById('pinEq');
+
+document.querySelectorAll('.map-pin').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const p = pinData[parseInt(btn.dataset.pin)];
+    pinIconWrap.style.background = p.bg;
+    pinIcon.className = 'fa-solid ' + p.icon;
+    pinIcon.style.color = p.color;
+    pinTitle.textContent = p.title[currentLang];
+    pinDist.textContent = p.dist;
+    pinCard.classList.remove('hidden');
+    pinEq.style.opacity = 1;
+    speak(p.speech[currentLang], currentLang, ()=>{ pinEq.style.opacity = 0; });
+  });
+});
+
+/* ==================================================================
+   OFFERS
+   ================================================================== */
+const offerSpeech = [
+  { hi:"पीएम-किसान योजना के तहत हर साल छह हज़ार रुपये सीधे आपके खाते में मिलते हैं।",
+    en:"Under the PM-Kisan scheme, six thousand rupees per year are sent directly to your account." },
+  { hi:"खाद पर सरकारी सब्सिडी उपलब्ध है, नज़दीकी केंद्र पर जाकर लाभ उठाएं।",
+    en:"A government subsidy is available on fertilizer — visit your nearest center to avail it." },
+  { hi:"ट्रैक्टर और कृषि यंत्र किराए पर लेने में छूट उपलब्ध है।",
+    en:"Discounts are available on renting tractors and farm equipment." },
+  { hi:"प्रमाणित बीजों पर सब्सिडी उपलब्ध है।",
+    en:"A subsidy is available on certified seeds." }
+];
+document.querySelectorAll('.offer-card').forEach(card=>{
+  card.addEventListener('click', ()=>{
+    document.querySelectorAll('.offer-card').forEach(c=>c.style.boxShadow='');
+    card.style.boxShadow = '0 0 0 3px var(--leaf) inset';
+    const s = offerSpeech[parseInt(card.dataset.offer)];
+    speak(s[currentLang], currentLang);
+  });
+});
+
+/* ==================================================================
+   LOANS
+   ================================================================== */
+document.getElementById('payNowBtn').addEventListener('click', ()=>{
+  toast(currentLang==='hi' ? 'भुगतान सफल रहा' : 'Payment successful', 'fa-circle-check');
+  speak(currentLang==='hi' ? "भुगतान सफल रहा।" : "Payment successful.", currentLang);
+});
+
+document.getElementById('checkEligBtn').addEventListener('click', ()=>{
+  document.getElementById('eligIdle').classList.add('hidden');
+  const loading = document.getElementById('eligLoading');
+  loading.classList.remove('hidden'); loading.classList.add('flex');
+  speak(currentLang==='hi' ? "जांच की जा रही है।" : "Checking your eligibility.", currentLang);
+  setTimeout(()=>{
+    loading.classList.add('hidden'); loading.classList.remove('flex');
+    const result = document.getElementById('eligResult');
+    result.classList.remove('hidden'); result.classList.add('flex');
+    speak(currentLang==='hi' ? "बधाई हो, आप किसान क्रेडिट कार्ड लोन के लिए पात्र हैं।" : "Congratulations, you are eligible for a Kisan Credit Card loan.", currentLang);
+  }, 1600);
+});
+
+document.getElementById('applyLoanBtn').addEventListener('click', ()=>{
+  toast(currentLang==='hi' ? 'आवेदन प्राप्त हो गया' : 'Application received', 'fa-paper-plane');
+  speak(currentLang==='hi' ? "आपका आवेदन प्राप्त हो गया है।" : "Your application has been received.", currentLang);
+});
+
+/* initial state */
+setLang('hi');
+
+/* register service worker so the app can be installed and opens offline */
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{ /* ignore in sandboxed previews */ });
+  });
+}
+
+</script>
+</body>
+</html>
