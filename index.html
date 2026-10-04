@@ -15,7 +15,136 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 
-<script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* Static utility CSS (replaces the Tailwind Play CDN - production-safe, works offline) */
+*,::before,::after{box-sizing:border-box;border:0 solid}
+html{line-height:1.5;-webkit-text-size-adjust:100%}
+body,h1,h2,h3,h4,p,blockquote,figure{margin:0}
+h1,h2,h3,h4{font-size:inherit;font-weight:inherit}
+button,input,select,textarea{font:inherit;color:inherit;margin:0;padding:0;background:transparent}
+button{cursor:pointer;-webkit-appearance:button}
+img,svg,video{display:block;max-width:100%}
+ul,ol{list-style:none;margin:0;padding:0}
+@keyframes pulse{50%{opacity:.5}}
+.absolute{position:absolute}
+.relative{position:relative}
+.inset-0{inset:0}
+.z-10{z-index:10}
+.z-30{z-index:30}
+.flex{display:flex}
+.inline-flex{display:inline-flex}
+.grid{display:grid}
+.flex-col{flex-direction:column}
+.flex-1{flex:1 1 0%}
+.flex-none{flex:none}
+.items-center{align-items:center}
+.items-end{align-items:flex-end}
+.justify-between{justify-content:space-between}
+.justify-center{justify-content:center}
+.justify-end{justify-content:flex-end}
+.overflow-hidden{overflow:hidden}
+.ml-auto{margin-left:auto}
+.uppercase{text-transform:uppercase}
+.text-center{text-align:center}
+.text-left{text-align:left}
+.w-full{width:100%}
+.font-semibold{font-weight:600}
+.font-bold{font-weight:700}
+.font-extrabold{font-weight:800}
+.leading-tight{line-height:1.25}
+.leading-snug{line-height:1.375}
+.tracking-wide{letter-spacing:.025em}
+.opacity-70{opacity:.7}
+.opacity-90{opacity:.9}
+.rounded-xl{border-radius:.75rem}
+.rounded-2xl{border-radius:1rem}
+.rounded-3xl{border-radius:1.5rem}
+.rounded-full{border-radius:9999px}
+.text-white{color:#fff}
+.text-white\/60{color:rgba(255,255,255,.6)}
+.text-white\/70{color:rgba(255,255,255,.7)}
+.text-white\/85{color:rgba(255,255,255,.85)}
+.bg-white\/25{background-color:rgba(255,255,255,.25)}
+.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
+.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}
+.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.text-xs{font-size:.75rem;line-height:1rem}
+.text-sm{font-size:.875rem;line-height:1.25rem}
+.text-base{font-size:1rem;line-height:1.5rem}
+.text-lg{font-size:1.125rem;line-height:1.75rem}
+.text-xl{font-size:1.25rem;line-height:1.75rem}
+.text-2xl{font-size:1.5rem;line-height:2rem}
+.text-3xl{font-size:1.875rem;line-height:2.25rem}
+.text-4xl{font-size:2.25rem;line-height:2.5rem}
+.text-5xl{font-size:3rem;line-height:1}
+.text-8xl{font-size:6rem;line-height:1}
+.text-\[9px\]{font-size:9px}
+.text-\[10px\]{font-size:10px}
+.text-\[11px\]{font-size:11px}
+.text-\[10\.5px\]{font-size:10.5px}
+.gap-1{gap:0.25rem}
+.gap-1\.5{gap:0.375rem}
+.gap-2{gap:0.5rem}
+.gap-2\.5{gap:0.625rem}
+.gap-3{gap:0.75rem}
+.gap-4{gap:1rem}
+.gap-5{gap:1.25rem}
+.gap-6{gap:1.5rem}
+.h-3{height:0.75rem}
+.h-4{height:1rem}
+.h-5{height:1.25rem}
+.h-10{height:2.5rem}
+.h-14{height:3.5rem}
+.h-16{height:4rem}
+.h-20{height:5rem}
+.h-24{height:6rem}
+.h-48{height:12rem}
+.w-5{width:1.25rem}
+.w-10{width:2.5rem}
+.w-14{width:3.5rem}
+.w-16{width:4rem}
+.w-20{width:5rem}
+.w-24{width:6rem}
+.w-48{width:12rem}
+.mb-1{margin-bottom:0.25rem}
+.mt-1{margin-top:0.25rem}
+.mb-2{margin-bottom:0.5rem}
+.mt-2{margin-top:0.5rem}
+.mb-3{margin-bottom:0.75rem}
+.mt-3{margin-top:0.75rem}
+.mb-4{margin-bottom:1rem}
+.mt-4{margin-top:1rem}
+.mb-5{margin-bottom:1.25rem}
+.mt-5{margin-top:1.25rem}
+.mb-6{margin-bottom:1.5rem}
+.mt-6{margin-top:1.5rem}
+.mb-7{margin-bottom:1.75rem}
+.mt-7{margin-top:1.75rem}
+.mb-8{margin-bottom:2rem}
+.mt-8{margin-top:2rem}
+.mr-1{margin-right:.25rem}
+.p-4{padding:1rem}
+.p-5{padding:1.25rem}
+.pt-4{padding-top:1rem}
+.px-1{padding-left:0.25rem;padding-right:0.25rem}
+.px-2{padding-left:0.5rem;padding-right:0.5rem}
+.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}
+.px-3{padding-left:0.75rem;padding-right:0.75rem}
+.px-4{padding-left:1rem;padding-right:1rem}
+.px-5{padding-left:1.25rem;padding-right:1.25rem}
+.px-6{padding-left:1.5rem;padding-right:1.5rem}
+.px-8{padding-left:2rem;padding-right:2rem}
+.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}
+.py-1{padding-top:0.25rem;padding-bottom:0.25rem}
+.py-2{padding-top:0.5rem;padding-bottom:0.5rem}
+.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}
+.py-3{padding-top:0.75rem;padding-bottom:0.75rem}
+.py-4{padding-top:1rem;padding-bottom:1rem}
+.py-5{padding-top:1.25rem;padding-bottom:1.25rem}
+.py-7{padding-top:1.75rem;padding-bottom:1.75rem}
+.hidden{display:none}
+</style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -77,6 +206,18 @@
     height:34px; flex:none; display:flex; align-items:center; justify-content:space-between;
     padding:0 26px; font-size:12px; font-weight:700; color:var(--forest); opacity:.75;
   }
+
+
+  /* ---------- INSTALLED APP / PHONE: drop the phone mockup, fill the screen ---------- */
+  @media (max-width:520px), (display-mode: standalone){
+    body{ padding:0 !important; display:block; min-height:100dvh; }
+    .phone{ width:100vw; max-width:100vw; height:100dvh; max-height:100dvh; padding:0; border-radius:0; box-shadow:none; background:var(--cream); }
+    .phone-screen{ border-radius:0; }
+    .notch{ display:none; }
+    .statusbar{ visibility:hidden; }
+  }
+  #installBtn{ position:absolute; top:40px; left:12px; z-index:55; width:34px; height:34px; border-radius:999px;
+    background:var(--turmeric); color:#fff; font-size:13px; display:none; align-items:center; justify-content:center; }
 
   /* ---------- SCREENS ---------- */
   .screen{
@@ -219,6 +360,7 @@
     <!-- =================== SCREEN 1 : SCAN / HOME =================== -->
     <section class="screen active" id="screen-home">
 
+      <button class="press-scale" id="installBtn" aria-label="Install app"><i class="fa-solid fa-download"></i></button>
       <button class="demo-fab press-scale" id="demoBtn" title="Demo walkthrough" aria-label="Run demo">
         <i class="fa-solid fa-play"></i>
       </button>
@@ -484,6 +626,12 @@
           </div>
           <span class="text-xs font-extrabold" style="color:var(--forest)">Loans</span>
         </button>
+        <button class="card press-scale flex flex-col items-center justify-center py-7 gap-3 pop-in" onclick="showScreen('benefit','more'); playBenefit()">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background:#FFF3CF; color:var(--turmeric-deep);">
+            <i class="fa-solid fa-coins"></i>
+          </div>
+          <span class="text-xs font-extrabold" style="color:var(--forest)">Fayda</span>
+        </button>
         <button class="card press-scale flex flex-col items-center justify-center py-7 gap-3 pop-in" onclick="showScreen('home')">
           <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background:var(--leaf-light); color:var(--leaf-deep);">
             <i class="fa-solid fa-house"></i>
@@ -491,6 +639,39 @@
           <span class="text-xs font-extrabold" style="color:var(--forest)">Home</span>
         </button>
       </div>
+    </section>
+
+    <!-- =================== SCREEN : FAYDA (benefit, zero text) =================== -->
+    <section class="screen" id="screen-benefit">
+      <div class="flex items-center gap-3 mb-4">
+        <button class="w-10 h-10 rounded-xl flex items-center justify-center press-scale" style="background:var(--paper); color:var(--forest);" onclick="window.speechSynthesis&&speechSynthesis.cancel();showScreen('more')">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <i class="fa-solid fa-coins text-2xl" style="color:var(--turmeric-deep)"></i>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="card flex flex-col items-center justify-end py-4" style="height:230px;">
+          <i class="fa-solid fa-mobile-screen-button text-lg mb-1" style="color:var(--alert); opacity:.0"></i>
+          <i id="plantA" class="fa-solid fa-seedling" style="color:#9AA79F; font-size:30px; transition:font-size 1s, color 1s;"></i>
+          <div class="mt-3 text-lg font-extrabold" style="color:#7A8A80"><i class="fa-solid fa-ban text-sm mr-1" style="color:var(--alert)"></i><span id="qtyA">0</span> q</div>
+        </div>
+        <div class="card flex flex-col items-center justify-end py-4" style="height:230px; border:2px solid var(--leaf);">
+          <i class="fa-solid fa-camera-retro text-lg mb-1" style="color:var(--turmeric-deep)"></i>
+          <i id="plantB" class="fa-solid fa-seedling" style="color:var(--leaf); font-size:30px; transition:font-size 1s, color 1s;"></i>
+          <div class="mt-3 text-lg font-extrabold" style="color:var(--leaf-deep)"><i class="fa-solid fa-circle-check text-sm mr-1"></i><span id="qtyB">0</span> q</div>
+        </div>
+      </div>
+      <div class="card flex items-center justify-center gap-3 py-5 mt-4">
+        <i id="coinIcon" class="fa-solid fa-coins text-4xl" style="color:var(--turmeric)"></i>
+        <span class="text-3xl font-extrabold" style="color:var(--forest)">&#8377;<span id="moneyNum">0</span></span>
+        <i class="fa-solid fa-arrow-trend-up text-2xl" style="color:var(--leaf)"></i>
+      </div>
+      <div class="flex items-center justify-center gap-5 mt-3 text-2xl" style="color:var(--leaf-deep)">
+        <span><i class="fa-solid fa-ruler-combined text-lg"></i> 1</span><i class="fa-solid fa-wheat-awn"></i><span class="text-lg font-extrabold">+18.75%</span>
+      </div>
+      <button class="w-full press-scale flex items-center justify-center rounded-3xl py-4 mt-5 text-3xl text-white" style="background:linear-gradient(135deg,var(--leaf),var(--leaf-deep));" onclick="playBenefit()" aria-label="Play">
+        <i class="fa-solid fa-play"></i>
+      </button>
     </section>
 
     <!-- =================== SCREEN 5 : MAP (nearby help) =================== -->
@@ -716,6 +897,42 @@ function toast(msg, icon='fa-circle-check'){
   setTimeout(()=> el.remove(), 2700);
 }
 
+
+/* ---------------- Fayda (benefit) plant animation ----------------
+   Example: wheat, 1 acre. Without app 14.4 q; with app 17.1 q;
+   benefit Rs 8,250 per season (see logbook Day 22-23). */
+let benefitRun = 0;
+function countUp(id, to, ms, dec){
+  const el = document.getElementById(id), t0 = performance.now();
+  (function step(t){
+    const p = Math.min(1,(t-t0)/ms), v = to*p;
+    el.textContent = dec ? v.toFixed(1) : Math.round(v).toLocaleString('en-IN');
+    if (p<1 && currentScreen==='benefit') requestAnimationFrame(step);
+  })(t0);
+}
+async function playBenefit(){
+  const run = ++benefitRun;
+  const A = document.getElementById('plantA'), B = document.getElementById('plantB');
+  const reset = (el,c)=>{ el.className='fa-solid fa-seedling'; el.style.fontSize='30px'; el.style.color=c; };
+  reset(A,'#9AA79F'); reset(B,'#2F9E5B');
+  ['qtyA','qtyB'].forEach(i=>document.getElementById(i).textContent='0');
+  document.getElementById('moneyNum').textContent='0';
+  await wait(500); if (run!==benefitRun) return;
+  A.style.fontSize='60px'; B.style.fontSize='60px';           // stage 2
+  await wait(1100); if (run!==benefitRun) return;
+  A.className='fa-solid fa-wheat-awn'; B.className='fa-solid fa-wheat-awn';
+  A.style.fontSize='85px'; B.style.fontSize='110px';           // stage 3 (B bigger)
+  A.style.color='#B8A66A'; B.style.color='#E0A21B';
+  countUp('qtyA',14.4,1400,true); countUp('qtyB',17.1,1400,true);
+  await wait(1500); if (run!==benefitRun) return;
+  countUp('moneyNum',8250,1500,false);
+  const coin = document.getElementById('coinIcon');
+  coin.classList.remove('pop-in'); void coin.offsetWidth; coin.classList.add('pop-in');
+  speak(currentLang==='hi'
+    ? 'एक एकड़ में आठ हज़ार दो सौ पचास रुपये का फायदा। फसल अठारह प्रतिशत ज़्यादा।'
+    : 'Benefit of eight thousand two hundred fifty rupees per acre. Yield is eighteen percent higher.', currentLang);
+}
+
 /* ---------------- screen navigation ---------------- */
 function showScreen(name, navName){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -901,35 +1118,56 @@ document.getElementById('noMatchRetryBtn').addEventListener('click', ()=>{
   goHome();
 });
 
-/* very lightweight "is this a leaf" check: leaves are green-dominant;
-   a hand, sky, wall, etc. usually isn't. This is a heuristic stand-in
-   for a real vision model, not actual plant-disease detection. */
+/* "is this a leaf" check - heuristic, not a real ML model.
+   Looks for GREEN regions (HSV) instead of averaging the whole picture, so a
+   small leaf in a big frame, or a small/low-resolution photo, is still detected.
+   Leaf if: the largest connected green patch is >= 3% of the picture, or
+   total green is >= 8%. Yellow/brown disease spots next to green are tolerated. */
 function looksLikeLeaf(file){
   return new Promise((resolve)=>{
-    try{
-      const reader = new FileReader();
-      reader.onload = (e)=>{
-        const img = new Image();
-        img.onload = ()=>{
-          const size = 32;
-          const canvas = document.createElement('canvas');
-          canvas.width = size; canvas.height = size;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, size, size);
-          let r=0,g=0,b=0,n=0;
-          try{
-            const data = ctx.getImageData(0,0,size,size).data;
-            for (let i=0; i<data.length; i+=4){ r+=data[i]; g+=data[i+1]; b+=data[i+2]; n++; }
-          }catch(err){ resolve(true); return; } // canvas blocked (CORS etc.) — don't block the demo
-          r/=n; g/=n; b/=n;
-          resolve(g > r*1.06 && g > b*1.06);
-        };
-        img.onerror = ()=> resolve(true);
-        img.src = e.target.result;
-      };
-      reader.onerror = ()=> resolve(true);
-      reader.readAsDataURL(file);
-    }catch(err){ resolve(true); }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      URL.revokeObjectURL(url);
+      try{
+        const W = 96, H = 96;                       // upscales tiny images, shrinks big ones
+        const c = document.createElement('canvas'); c.width = W; c.height = H;
+        const ctx = c.getContext('2d', {willReadFrequently:true});
+        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, W, H);
+        const d = ctx.getImageData(0,0,W,H).data;
+        const mask = new Uint8Array(W*H);
+        let green = 0;
+        for (let i=0,p=0; i<d.length; i+=4,p++){
+          const r=d[i]/255, g=d[i+1]/255, bl=d[i+2]/255;
+          const mx=Math.max(r,g,bl), mn=Math.min(r,g,bl), df=mx-mn;
+          if (mx < 0.10 || df/mx < 0.15) continue;           // too dark or grey/white
+          let h;
+          if (mx===r) h=((g-bl)/df)%6; else if (mx===g) h=(bl-r)/df+2; else h=(r-g)/df+4;
+          h*=60; if (h<0) h+=360;
+          if (h>=55 && h<=170 && g>=bl*0.9){ mask[p]=1; green++; }
+        }
+        // largest connected green patch (iterative flood fill)
+        const seen = new Uint8Array(W*H); let largest = 0; const stack = [];
+        for (let s0=0; s0<W*H; s0++){
+          if (!mask[s0] || seen[s0]) continue;
+          let size = 0; stack.push(s0); seen[s0]=1;
+          while (stack.length){
+            const p = stack.pop(); size++;
+            const x = p % W, y = (p/W)|0;
+            if (x>0   && mask[p-1] && !seen[p-1]){ seen[p-1]=1; stack.push(p-1); }
+            if (x<W-1 && mask[p+1] && !seen[p+1]){ seen[p+1]=1; stack.push(p+1); }
+            if (y>0   && mask[p-W] && !seen[p-W]){ seen[p-W]=1; stack.push(p-W); }
+            if (y<H-1 && mask[p+W] && !seen[p+W]){ seen[p+W]=1; stack.push(p+W); }
+          }
+          if (size > largest) largest = size;
+        }
+        const total = W*H;
+        resolve(largest/total >= 0.03 || green/total >= 0.08);
+      }catch(err){ resolve(true); }   // never block the app if canvas fails
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); resolve(true); };
+    img.src = url;
   });
 }
 
@@ -990,19 +1228,62 @@ const stageData = [
     speech:{ hi:"फसल तैयार होने पर सही समय पर कटाई करें।", en:"Harvest the crop at the right time when ready." } }
 ];
 
+/* ---------- clearer voice: best-voice picker + sentence chunks ---------- */
+let _voices = [], _speakToken = 0, _warnedVoice = false;
+function _loadVoices(){ try{ _voices = window.speechSynthesis.getVoices() || []; }catch(e){} }
+if ('speechSynthesis' in window){ _loadVoices(); window.speechSynthesis.onvoiceschanged = _loadVoices; }
+
+function pickVoice(lang){
+  const want = lang === 'hi' ? ['hi-in','hi'] : ['en-in','en-gb','en-us','en'];
+  let best = null, bestScore = -1;
+  _voices.forEach(v=>{
+    const l = (v.lang||'').replace('_','-').toLowerCase();
+    const idx = want.findIndex(w => l === w || l.startsWith(w+'-'));
+    if (idx < 0) return;
+    let sc = 10 - idx*2;
+    const n = (v.name||'').toLowerCase();
+    if (/google|neural|natural|online|wavenet/.test(n)) sc += 4;   // higher-quality voices
+    if (/microsoft|apple|siri|samsung/.test(n)) sc += 2;
+    if (v.localService === false) sc += 1;
+    if (sc > bestScore){ best = v; bestScore = sc; }
+  });
+  return best;
+}
+
 function speak(text, lang, onend){
   if (!('speechSynthesis' in window)){
     toast('Audio not supported on this browser', 'fa-triangle-exclamation');
     if (onend) onend();
     return;
   }
-  window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
-  utter.rate = 0.95;
-  utter.onend = ()=>{ if (onend) onend(); };
-  utter.onerror = ()=>{ if (onend) onend(); };
-  window.speechSynthesis.speak(utter);
+  const synth = window.speechSynthesis;
+  const token = ++_speakToken;
+  synth.cancel();
+  if (!_voices.length) _loadVoices();
+  const voice = pickVoice(lang);
+  if (lang === 'hi' && !voice && !_warnedVoice){
+    _warnedVoice = true;
+    toast('Hindi voice not found - install it in phone Settings > Text-to-speech', 'fa-triangle-exclamation');
+  }
+  // split into short sentences: clearer pauses, avoids Chrome cutting long speech
+  const parts = String(text).split(/(?<=[\u0964.!?])\s+/).map(t=>t.trim()).filter(Boolean);
+  if (!parts.length){ if (onend) onend(); return; }
+  setTimeout(()=>{
+    if (token !== _speakToken) return;
+    parts.forEach((p,i)=>{
+      const u = new SpeechSynthesisUtterance(p);
+      u.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
+      if (voice) u.voice = voice;
+      u.rate = lang === 'hi' ? 0.82 : 0.88;   // slower = clearer
+      u.pitch = 1;
+      u.volume = 1;
+      if (i === parts.length - 1){
+        const done = ()=>{ if (token === _speakToken && onend) onend(); };
+        u.onend = done; u.onerror = done;
+      }
+      synth.speak(u);
+    });
+  }, 80);
 }
 
 /* language toggle */
@@ -1205,6 +1486,17 @@ document.getElementById('applyLoanBtn').addEventListener('click', ()=>{
 
 /* initial state */
 setLang('hi');
+
+
+/* install prompt (Android/Chrome): shows a download icon until installed */
+let _installEvt = null;
+const installBtn = document.getElementById('installBtn');
+window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); _installEvt = e; installBtn.style.display='flex'; });
+installBtn.addEventListener('click', async ()=>{
+  if (!_installEvt) return;
+  _installEvt.prompt(); await _installEvt.userChoice; _installEvt = null; installBtn.style.display='none';
+});
+window.addEventListener('appinstalled', ()=>{ installBtn.style.display='none'; });
 
 /* register service worker so the app can be installed and opens offline */
 if ('serviceWorker' in navigator){
